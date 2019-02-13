@@ -4,6 +4,10 @@ use clap::{App, Arg, value_t_or_exit};
 use crate::interpreter::Interpreter;
 
 fn main() {
+    #[cfg(windows)] {
+        let _ = ansi_term::enable_ansi_support(); //some bf programs use ansi escape codes and these need to be enabled for windows
+    }
+
     let matches = App::new("Brainfuck Interpreter")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Thomas Lienbacher <lienbacher.tom@gmail.com>")
@@ -14,7 +18,7 @@ fn main() {
             .value_name("CELLS")
             .help("Sets the amount of memory cells available")
             .takes_value(true)
-            .default_value("16000"))
+            .default_value("30000"))
         .arg(Arg::with_name("file")
             .help("Brainfuck program to run")
             .value_name("FILE")
