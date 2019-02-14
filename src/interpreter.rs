@@ -22,6 +22,11 @@ pub enum BfError {
     UnexpectedInput {
         internal: text_io::Error
     },
+
+    #[fail(display = "Memory out of bounds at: {}", index)]
+    MemoryOutOfBounds {
+        index: usize
+    },
 }
 
 impl From<io::Error> for BfError {
@@ -133,6 +138,20 @@ impl Interpreter {
         Ok(())
     }
 
+    fn get_cell(&self, index: usize) -> Result<&i64, BfError> {
+        match self.cells.get(self.pointer) {
+            Some(o) => { Ok(o) }
+            None => return Err(BfError::MemoryOutOfBounds { index })
+        }
+    }
+
+    fn get_cell_mut(&mut self, index: usize) -> Result<&mut i64, BfError> {
+        match self.cells.get_mut(self.pointer) {
+            Some(o) => { Ok(o) }
+            None => return Err(BfError::MemoryOutOfBounds { index })
+        }
+    }
+
     fn interpret(&mut self) -> Result<(), BfError> {
         let mut i = 0;
 
@@ -149,25 +168,25 @@ impl Interpreter {
                     i += 1;
                 }
                 Commands::Increment => {
-                    self.cells[self.pointer] += 1;
+                    *self.get_cell_mut(i)? += 1;
                     i += 1;
                 }
                 Commands::Decrement => {
-                    self.cells[self.pointer] -= 1;
+                    *self.get_cell_mut(i)? -= 1;
                     i += 1;
                 }
                 Commands::Print => {
-                    print!("{}", (self.cells[self.pointer] as u8) as char);
+                    print!("{}", (*self.get_cell(i)? as u8) as char);
                     io::stdout().flush()?;
                     i += 1;
                 }
                 Commands::Scan => {
                     let g: char = try_read!()?;
-                    self.cells[self.pointer] = g as i64;
+                    *self.get_cell_mut(i)? = g as i64;
                     i += 1;
                 }
                 Commands::LoopBegin { other_pair } => {
-                    if self.cells[self.pointer] == 0 {
+                    if *(self.get_cell(i))? == 0 {
                         i = *other_pair;
                     }
                     i += 1;

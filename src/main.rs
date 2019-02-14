@@ -33,6 +33,6 @@ fn main() {
 
     match ip.run(file) {
         Ok(_) => {}
-        Err(e) => eprintln!("Error: {}", e)
+        Err(e) => eprintln!("{}", e)
     }
 }
