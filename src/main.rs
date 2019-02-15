@@ -1,7 +1,8 @@
-mod interpreter;
-
 use clap::{App, Arg, value_t_or_exit};
+
 use crate::interpreter::Interpreter;
+
+mod interpreter;
 
 fn main() {
     #[cfg(windows)] {

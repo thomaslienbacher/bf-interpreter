@@ -1,10 +1,11 @@
-use std::result;
-use std::io::prelude::*;
-use std::io::BufReader;
-use std::io;
 use std::fs::File;
-use text_io::*;
+use std::io;
+use std::io::BufReader;
+use std::io::prelude::*;
+use std::result;
+
 use failure::*;
+use text_io::*;
 
 #[derive(Debug, Fail)]
 pub enum BfError {
@@ -131,7 +132,7 @@ impl Interpreter {
             line.clear();
         }
 
-        if loop_begins.len() > 0 {
+        if !loop_begins.is_empty() {
             return Err(BfError::NoneMatchingBracket { index: loop_begins.pop().unwrap() });
         }
 
@@ -141,14 +142,14 @@ impl Interpreter {
     fn get_cell(&self, index: usize) -> Result<&i64, BfError> {
         match self.cells.get(self.pointer) {
             Some(o) => { Ok(o) }
-            None => return Err(BfError::MemoryOutOfBounds { index })
+            None => Err(BfError::MemoryOutOfBounds { index })
         }
     }
 
     fn get_cell_mut(&mut self, index: usize) -> Result<&mut i64, BfError> {
         match self.cells.get_mut(self.pointer) {
             Some(o) => { Ok(o) }
-            None => return Err(BfError::MemoryOutOfBounds { index })
+            None => Err(BfError::MemoryOutOfBounds { index })
         }
     }
 
