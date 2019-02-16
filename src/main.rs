@@ -25,15 +25,28 @@ fn main() {
             .value_name("FILE")
             .required(true)
             .index(1))
+        .arg(Arg::with_name("type")
+            .help("Type to store in a cell")
+            .value_name("TYPE")
+            .short("t")
+            .long("type")
+            .default_value("i32")
+            .possible_values(&["i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"])
+            .case_insensitive(true))
         .get_matches();
 
     let cells = value_t_or_exit!(matches, "cells", usize);
-    let file = matches.value_of("file").unwrap().to_string();
+    let file = matches.value_of("file").unwrap();
 
-    let mut ip = Interpreter::new(cells);
-
-    match ip.run(file) {
-        Ok(_) => {}
-        Err(e) => eprintln!("{}", e)
-    }
+    match matches.value_of("type").unwrap() {
+        "i8" => { Interpreter::<i8>::new(cells).execute(file) }
+        "u8" => { Interpreter::<u8>::new(cells).execute(file) }
+        "i16" => { Interpreter::<i16>::new(cells).execute(file) }
+        "u16" => { Interpreter::<u16>::new(cells).execute(file) }
+        "i32" => { Interpreter::<i32>::new(cells).execute(file) }
+        "u32" => { Interpreter::<u32>::new(cells).execute(file) }
+        "i64" => { Interpreter::<i64>::new(cells).execute(file) }
+        "u64" => { Interpreter::<u64>::new(cells).execute(file) }
+        _ => { Interpreter::<i32>::new(cells).execute(file) }
+    };
 }

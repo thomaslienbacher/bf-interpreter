@@ -2,9 +2,13 @@ use std::fs::File;
 use std::io;
 use std::io::BufReader;
 use std::io::prelude::*;
+use std::ops::{AddAssign, SubAssign};
 use std::result;
 
 use failure::*;
+use num_traits::FromPrimitive;
+use num_traits::identities::{One, Zero};
+use num_traits::ToPrimitive;
 use text_io::*;
 
 #[derive(Debug, Fail)]
@@ -58,22 +62,22 @@ enum Commands {
     },
 }
 
-pub struct Interpreter {
+pub struct Interpreter<T> {
     program: Vec<Commands>,
-    cells: Vec<i64>,
+    cells: Vec<T>,
     pointer: usize,
 }
 
-impl Interpreter {
+impl<T: Clone + Zero + One + ToPrimitive + FromPrimitive + AddAssign + SubAssign + PartialEq> Interpreter<T> {
     pub fn new(cells: usize) -> Self {
         Interpreter {
             program: Vec::new(),
-            cells: vec![0; cells],
+            cells: vec![T::zero(); cells],
             pointer: 0,
         }
     }
 
-    fn compile(&mut self, file: String) -> result::Result<(), BfError> {
+    fn compile(&mut self, file: &str) -> result::Result<(), BfError> {
         let f = File::open(file)?;
         let mut reader = BufReader::new(f);
         let mut line = String::new();
@@ -139,14 +143,14 @@ impl Interpreter {
         Ok(())
     }
 
-    fn get_cell(&self, index: usize) -> Result<&i64, BfError> {
+    fn get_cell(&self, index: usize) -> Result<&T, BfError> {
         match self.cells.get(self.pointer) {
             Some(o) => { Ok(o) }
             None => Err(BfError::MemoryOutOfBounds { index })
         }
     }
 
-    fn get_cell_mut(&mut self, index: usize) -> Result<&mut i64, BfError> {
+    fn get_cell_mut(&mut self, index: usize) -> Result<&mut T, BfError> {
         match self.cells.get_mut(self.pointer) {
             Some(o) => { Ok(o) }
             None => Err(BfError::MemoryOutOfBounds { index })
@@ -169,25 +173,25 @@ impl Interpreter {
                     i += 1;
                 }
                 Commands::Increment => {
-                    *self.get_cell_mut(i)? += 1;
+                    *self.get_cell_mut(i)? += T::one();
                     i += 1;
                 }
                 Commands::Decrement => {
-                    *self.get_cell_mut(i)? -= 1;
+                    *self.get_cell_mut(i)? -= T::one();
                     i += 1;
                 }
                 Commands::Print => {
-                    print!("{}", (*self.get_cell(i)? as u8) as char);
+                    print!("{}", self.get_cell(i)?.to_u8().unwrap() as char);
                     io::stdout().flush()?;
                     i += 1;
                 }
                 Commands::Scan => {
                     let g: char = try_read!()?;
-                    *self.get_cell_mut(i)? = g as i64;
+                    *self.get_cell_mut(i)? = T::from_u8(g as u8).unwrap();
                     i += 1;
                 }
                 Commands::LoopBegin { other_pair } => {
-                    if *(self.get_cell(i))? == 0 {
+                    if *(self.get_cell(i))? == T::zero() {
                         i = *other_pair;
                     }
                     i += 1;
@@ -201,9 +205,16 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn run(&mut self, file: String) -> result::Result<(), BfError> {
+    pub fn run(&mut self, file: &str) -> result::Result<(), BfError> {
         self.compile(file)?;
         self.interpret()?;
         Ok(())
+    }
+
+    pub fn execute(&mut self, file: &str) {
+        match self.run(file) {
+            Ok(_) => {}
+            Err(e) => eprintln!("{}", e)
+        }
     }
 }
