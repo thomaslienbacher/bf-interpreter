@@ -5,30 +5,30 @@ use std::io::prelude::*;
 use std::ops::{AddAssign, SubAssign};
 use std::result;
 
-use failure::*;
 use num_traits::FromPrimitive;
 use num_traits::identities::{One, Zero};
 use num_traits::ToPrimitive;
 use text_io::*;
+use thiserror::Error;
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum BfError {
-    #[fail(display = "IO Error: {}", internal)]
+    #[error("IO Error: {}", internal)]
     IoError {
         internal: io::Error
     },
 
-    #[fail(display = "None matching bracket at: {}", index)]
+    #[error("None matching bracket at: {}", index)]
     NoneMatchingBracket {
         index: usize
     },
 
-    #[fail(display = "Unexpected input: {}", internal)]
+    #[error("Unexpected input: {}", internal)]
     UnexpectedInput {
         internal: text_io::Error
     },
 
-    #[fail(display = "Memory out of bounds at: {}", index)]
+    #[error("Memory out of bounds at: {}", index)]
     MemoryOutOfBounds {
         index: usize
     },
