@@ -1,12 +1,12 @@
 [package]
 name = "bf-interpreter"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Thomas Lienbacher <lienbacher.tom@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-clap = "2.32"
+clap = { version = "4.3", features = ["derive"] }
 text_io = "0.1"
-failure = "0.1"
-ansi_term = "0.11"
+ansi_term = "0.12"
 num-traits = "0.2"
+failure = "0.1"

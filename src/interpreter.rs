@@ -77,7 +77,7 @@ impl<T: Clone + Zero + One + ToPrimitive + FromPrimitive + AddAssign + SubAssign
         }
     }
 
-    fn compile(&mut self, file: &str) -> result::Result<(), BfError> {
+    fn compile(&mut self, file: &String) -> result::Result<(), BfError> {
         let f = File::open(file)?;
         let mut reader = BufReader::new(f);
         let mut line = String::new();
@@ -205,13 +205,13 @@ impl<T: Clone + Zero + One + ToPrimitive + FromPrimitive + AddAssign + SubAssign
         Ok(())
     }
 
-    pub fn run(&mut self, file: &str) -> result::Result<(), BfError> {
+    pub fn run(&mut self, file: &String) -> Result<(), BfError> {
         self.compile(file)?;
         self.interpret()?;
         Ok(())
     }
 
-    pub fn execute(&mut self, file: &str) {
+    pub fn execute(&mut self, file: &String) {
         match self.run(file) {
             Ok(_) => {}
             Err(e) => eprintln!("{}", e)
